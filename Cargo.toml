@@ -1,0 +1,44 @@
+[package]
+name = "hulunote-server"
+version = "0.1.0"
+edition = "2021"
+authors = ["hulunote"]
+description = "Hulunote - Outline note-taking application backend"
+
+[dependencies]
+# Web framework
+axum = { version = "0.7", features = ["macros", "multipart"] }
+tokio = { version = "1", features = ["full"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "fs", "trace"] }
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio", "postgres", "uuid", "chrono", "json"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Authentication
+jsonwebtoken = "9"
+bcrypt = "0.15"
+
+# Utilities
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "1"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+dotenvy = "0.15"
+rand = "0.8"
+
+# Email (optional, for verification)
+lettre = { version = "0.11", features = ["tokio1-native-tls"], optional = true }
+
+[features]
+default = []
+email = ["lettre"]
+
+[profile.release]
+lto = true
