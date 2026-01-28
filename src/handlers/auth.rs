@@ -93,6 +93,11 @@ pub async fn web_signup(
     let cell_number = Uuid::new_v4().to_string();
     let username = req.username.unwrap_or_else(|| req.email.clone());
 
+    // Generate random number BEFORE the await (thread_rng is not Send)
+    let random_suffix: u32 = rand::thread_rng().gen_range(0..10000);
+    let db_name = format!("{}-{}", username, random_suffix);
+    let db_id = Uuid::new_v4();
+
     // Create account
     let account: Account = sqlx::query_as(
         r#"
@@ -113,10 +118,6 @@ pub async fn web_signup(
     .await?;
 
     // Create default database for user
-    let mut rng = rand::thread_rng();
-    let db_name = format!("{}-{}", username, rng.gen_range(0..10000));
-    let db_id = Uuid::new_v4();
-
     sqlx::query(
         r#"
         INSERT INTO hulunote_databases (id, name, account_id, is_default)
