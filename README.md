@@ -48,10 +48,9 @@ vim .env
 
 ### 2. 数据库初始化
 
-使用原有的 SQL schema 初始化数据库：
-
 ```bash
-psql -U postgres -d hulunote -f ../hulunote/sql/schema.sql
+createdb -U postgres hulunote_open
+psql -U postgres -d hulunote_open -f init.sql
 ```
 
 ### 3. 编译运行
