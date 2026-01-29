@@ -7,8 +7,9 @@ mod models;
 mod routes;
 
 use axum::Router;
+use axum::http::{HeaderName, HeaderValue, Method};
 use std::net::SocketAddr;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -32,11 +33,20 @@ async fn main() -> anyhow::Result<()> {
     // Build application state
     let app_state = handlers::AppState::new(pool);
 
-    // CORS configuration
+    // CORS configuration - 允许开发环境跨域
     let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
+        .allow_origin([
+            "http://127.0.0.1:8803".parse::<HeaderValue>().unwrap(),
+            "http://localhost:8803".parse::<HeaderValue>().unwrap(),
+            "http://127.0.0.1:6689".parse::<HeaderValue>().unwrap(),
+            "http://localhost:6689".parse::<HeaderValue>().unwrap(),
+        ])
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
+        .allow_headers([
+            HeaderName::from_static("content-type"),
+            HeaderName::from_static("x-functor-api-token"),
+            HeaderName::from_static("authorization"),
+        ]);
 
     // Build the router
     let app = Router::new()
