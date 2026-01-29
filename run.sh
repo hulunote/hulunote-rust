@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置环境变量（如果没有 .env 文件）
-export DATABASE_URL="${DATABASE_URL:-postgres://postgres:password@localhost:5432/hulunote}"
+##export DATABASE_URL="${DATABASE_URL:-postgres://postgres:password@localhost:5432/hulunote}"
 export JWT_SECRET="${JWT_SECRET:-hulunote-secret-key}"
 export PORT="${PORT:-6689}"
 export RUST_LOG="${RUST_LOG:-hulunote_server=debug,tower_http=debug}"
