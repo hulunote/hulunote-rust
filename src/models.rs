@@ -280,6 +280,8 @@ pub struct NavInfo {
     pub content: String,
     #[serde(rename = "account-id")]
     pub account_id: i64,
+    #[serde(rename = "last-account-id")]
+    pub last_account_id: i64,
     #[serde(rename = "note-id")]
     pub note_id: String,
     #[serde(rename = "hulunote-note")]
@@ -307,6 +309,7 @@ impl From<HulunoteNav> for NavInfo {
             same_deep_order: nav.same_deep_order,
             content: nav.content,
             account_id: nav.account_id,
+            last_account_id: nav.account_id, // Use account_id as last_account_id
             note_id: nav.note_id.clone(),
             hulunote_note: nav.note_id,
             database_id: nav.database_id,
