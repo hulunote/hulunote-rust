@@ -309,3 +309,200 @@ ON CONFLICT (id) DO NOTHING;
 -- =====================================================
 -- END OF INITIALIZATION SCRIPT
 -- =====================================================
+
+-- =====================================================
+-- TEST DATA: About Hulunote Note
+-- =====================================================
+INSERT INTO hulunote_notes (
+    id, title, database_id, root_nav_id, is_delete, is_public, is_shortcut, account_id, pv
+) VALUES (
+    '33333333-4444-5555-6666-777777777777'::uuid,
+    'About Hulunote',
+    'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    'cccccccc-dddd-eeee-ffff-000000000000',
+    false, false, false,
+    (SELECT id FROM accounts WHERE mail = 'chanshunli@gmail.com'),
+    0
+) ON CONFLICT (id) DO NOTHING;
+
+-- Nav nodes for About Hulunote
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT 'cccccccc-dddd-eeee-ffff-000000000000'::uuid, '00000000-0000-0000-0000-000000000000', 0, 'ROOT',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000001'::uuid, 'cccccccc-dddd-eeee-ffff-000000000000', 1.0,
+       'What is Hulunote?', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000002'::uuid, '00000003-0001-0001-0001-000000000001', 1.0,
+       'An open-source outliner note-taking application with bidirectional linking',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000003'::uuid, '00000003-0001-0001-0001-000000000001', 2.0,
+       'Inspired by [[Roam Research]], designed for networked thought',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000004'::uuid, '00000003-0001-0001-0001-000000000001', 3.0,
+       'Fully open-source and self-hostable',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000005'::uuid, 'cccccccc-dddd-eeee-ffff-000000000000', 2.0,
+       'Key Features', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000006'::uuid, '00000003-0001-0001-0001-000000000005', 1.0,
+       '📝 **Outliner Structure** - Organize thoughts in hierarchical bullet points',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000007'::uuid, '00000003-0001-0001-0001-000000000006', 1.0,
+       'Infinite nesting levels for deep organization',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000008'::uuid, '00000003-0001-0001-0001-000000000006', 2.0,
+       'Use Tab/Shift+Tab to indent/outdent blocks',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000009'::uuid, '00000003-0001-0001-0001-000000000005', 2.0,
+       '🔗 **Bidirectional Links** - Connect ideas across notes with [[wiki-style links]]',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000010'::uuid, '00000003-0001-0001-0001-000000000009', 1.0,
+       'Type [[note title]] to create or link to another page',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000011'::uuid, '00000003-0001-0001-0001-000000000009', 2.0,
+       'See all backlinks - discover how your notes connect',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000012'::uuid, '00000003-0001-0001-0001-000000000005', 3.0,
+       '📅 **Daily Notes** - Journaling with automatic date-based pages',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000013'::uuid, '00000003-0001-0001-0001-000000000005', 4.0,
+       '📚 **Multiple Databases** - Separate workspaces for different projects',
+       id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000014'::uuid, 'cccccccc-dddd-eeee-ffff-000000000000', 3.0,
+       'Tech Stack', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000015'::uuid, '00000003-0001-0001-0001-000000000014', 1.0,
+       '🦀 **Backend: Rust**', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000016'::uuid, '00000003-0001-0001-0001-000000000015', 1.0,
+       'Built with Axum web framework', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000017'::uuid, '00000003-0001-0001-0001-000000000015', 2.0,
+       'SQLx for type-safe PostgreSQL queries', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000018'::uuid, '00000003-0001-0001-0001-000000000015', 3.0,
+       'JWT authentication with bcrypt password hashing', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000019'::uuid, '00000003-0001-0001-0001-000000000014', 2.0,
+       '🌐 **Frontend: ClojureScript**', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000020'::uuid, '00000003-0001-0001-0001-000000000019', 1.0,
+       'Rum - React wrapper for ClojureScript', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000021'::uuid, '00000003-0001-0001-0001-000000000019', 2.0,
+       'DataScript - In-memory Datalog database for client-side state', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000022'::uuid, '00000003-0001-0001-0001-000000000019', 3.0,
+       'Shadow-cljs for modern JS bundling', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000023'::uuid, '00000003-0001-0001-0001-000000000014', 3.0,
+       '🐘 **Database: PostgreSQL**', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000024'::uuid, 'cccccccc-dddd-eeee-ffff-000000000000', 4.0,
+       'Getting Started', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000025'::uuid, '00000003-0001-0001-0001-000000000024', 1.0,
+       'Prerequisites: PostgreSQL, Rust, Node.js, Clojure', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000026'::uuid, '00000003-0001-0001-0001-000000000024', 2.0,
+       'Quick Start:', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000027'::uuid, '00000003-0001-0001-0001-000000000026', 1.0,
+       '1. `createdb hulunote_open && psql -d hulunote_open -f init.sql`', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000028'::uuid, '00000003-0001-0001-0001-000000000026', 2.0,
+       '2. `cd hulunote-rust && cargo run`', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000029'::uuid, '00000003-0001-0001-0001-000000000026', 3.0,
+       '3. `cd hulunote && shadow-cljs watch hulunote`', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000030'::uuid, '00000003-0001-0001-0001-000000000026', 4.0,
+       '4. Open http://localhost:6689 and login with test account', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000031'::uuid, 'cccccccc-dddd-eeee-ffff-000000000000', 5.0,
+       'Links', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000032'::uuid, '00000003-0001-0001-0001-000000000031', 1.0,
+       '🔗 Frontend: https://github.com/xlisp/hulunote', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties, extra_id)
+SELECT '00000003-0001-0001-0001-000000000033'::uuid, '00000003-0001-0001-0001-000000000031', 2.0,
+       '🔗 Backend: https://github.com/xlisp/hulunote-rust', id, '33333333-4444-5555-6666-777777777777', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '', ''
+FROM accounts WHERE mail = 'chanshunli@gmail.com' ON CONFLICT (id) DO NOTHING;
