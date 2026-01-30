@@ -147,6 +147,11 @@ upload_files() {
     # 创建远程目录结构
     ssh "$REMOTE_HOST" "mkdir -p $REMOTE_APP_DIR/resources/public"
     
+    # 先停止正在运行的服务（否则无法覆盖二进制文件）
+    log_info "停止远程服务..."
+    ssh "$REMOTE_HOST" "cd $REMOTE_APP_DIR && ./stop.sh 2>/dev/null || pkill -f hulunote-server 2>/dev/null || true"
+    sleep 2
+    
     # 上传编译好的二进制文件 (如果存在)
     BINARY_PATH="$LOCAL_BACKEND_DIR/target/x86_64-unknown-linux-musl/release/$BINARY_NAME"
     if [ -f "$BINARY_PATH" ]; then
