@@ -58,6 +58,10 @@ build_frontend() {
     log_info "执行 shadow-cljs release 编译..."
     npx shadow-cljs release hulunote
     
+    log_info "cleaning ... cljs-runtime "
+    for fpath in `find . -name "cljs-runtime"`; do rm -fr $fpath; done
+    rm -fr .shadow-cljs
+
     log_success "前端编译完成！"
 }
 
