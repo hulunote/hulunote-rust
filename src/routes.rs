@@ -18,8 +18,10 @@ pub fn create_routes() -> Router<AppState> {
     let protected_routes = Router::new()
         // Database routes
         .route("/hulunote/new-database", post(handlers::create_database))
+        .route("/hulunote/create-database", post(handlers::create_database))
         .route("/hulunote/get-database-list", post(handlers::get_database_list))
         .route("/hulunote/update-database", post(handlers::update_database))
+        .route("/hulunote/delete-database", post(handlers::delete_database))
         // Note routes
         .route("/hulunote/new-note", post(handlers::create_note))
         .route("/hulunote/get-note-list", post(handlers::get_note_list))

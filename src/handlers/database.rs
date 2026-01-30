@@ -1,4 +1,5 @@
 use axum::{extract::State, Extension, Json};
+use serde::Deserialize;
 use serde_json::{json, Value};
 use uuid::Uuid;
 
@@ -55,6 +56,19 @@ pub async fn create_database(
         return Err(AppError::BadRequest("Maximum 5 databases allowed".to_string()));
     }
 
+    // Check if database name already exists for this user
+    let existing: Option<(Uuid,)> = sqlx::query_as(
+        "SELECT id FROM hulunote_databases WHERE name = $1 AND account_id = $2 AND is_delete = false"
+    )
+    .bind(&req.database_name)
+    .bind(account_id)
+    .fetch_optional(state.pool.as_ref())
+    .await?;
+
+    if existing.is_some() {
+        return Err(AppError::BadRequest(format!("Database '{}' already exists", req.database_name)));
+    }
+
     let db_id = Uuid::new_v4();
 
     let db: HulunoteDatabase = sqlx::query_as(
@@ -72,7 +86,94 @@ pub async fn create_database(
     .fetch_one(state.pool.as_ref())
     .await?;
 
-    Ok(Json(json!(DatabaseInfo::from(db))))
+    // Return with "database" key to match frontend expectation
+    Ok(Json(json!({
+        "database": DatabaseInfo::from(db),
+        "success": true
+    })))
+}
+
+/// Delete database request
+#[derive(Debug, Deserialize)]
+pub struct DeleteDatabaseRequest {
+    #[serde(rename = "database-id")]
+    pub database_id: Option<String>,
+    #[serde(rename = "database-name")]
+    pub database_name: Option<String>,
+}
+
+/// Delete a database (soft delete)
+pub async fn delete_database(
+    State(state): State<AppState>,
+    Extension(account_id): Extension<i64>,
+    Json(req): Json<DeleteDatabaseRequest>,
+) -> Result<Json<Value>> {
+    // Get database UUID from id or name
+    let db_uuid = if let Some(ref id) = req.database_id {
+        Uuid::parse_str(id)
+            .map_err(|_| AppError::BadRequest("Invalid database ID".to_string()))?
+    } else if let Some(ref name) = req.database_name {
+        let result: Option<(Uuid,)> = sqlx::query_as(
+            "SELECT id FROM hulunote_databases WHERE name = $1 AND account_id = $2 AND is_delete = false"
+        )
+        .bind(name)
+        .bind(account_id)
+        .fetch_optional(state.pool.as_ref())
+        .await?;
+        
+        result
+            .map(|r| r.0)
+            .ok_or_else(|| AppError::NotFound("Database not found".to_string()))?
+    } else {
+        return Err(AppError::BadRequest("Database ID or name required".to_string()));
+    };
+
+    // Check ownership
+    let exists: Option<(i64,)> = sqlx::query_as(
+        "SELECT account_id FROM hulunote_databases WHERE id = $1 AND is_delete = false"
+    )
+    .bind(db_uuid)
+    .fetch_optional(state.pool.as_ref())
+    .await?;
+
+    match exists {
+        Some((owner_id,)) if owner_id != account_id => {
+            return Err(AppError::PermissionDenied("Cannot delete other's database".to_string()));
+        }
+        None => {
+            return Err(AppError::NotFound("Database not found".to_string()));
+        }
+        _ => {}
+    }
+
+    // Soft delete the database
+    sqlx::query(
+        "UPDATE hulunote_databases SET is_delete = true, updated_at = NOW() WHERE id = $1"
+    )
+    .bind(db_uuid)
+    .execute(state.pool.as_ref())
+    .await?;
+
+    // Optionally: soft delete all notes in this database
+    sqlx::query(
+        "UPDATE hulunote_notes SET is_delete = true, updated_at = NOW() WHERE database_id = $1"
+    )
+    .bind(db_uuid.to_string())
+    .execute(state.pool.as_ref())
+    .await?;
+
+    // Optionally: soft delete all navs in this database
+    sqlx::query(
+        "UPDATE hulunote_navs SET is_delete = true, updated_at = NOW() WHERE database_id = $1"
+    )
+    .bind(db_uuid.to_string())
+    .execute(state.pool.as_ref())
+    .await?;
+
+    Ok(Json(json!({
+        "success": true,
+        "message": "Database deleted successfully"
+    })))
 }
 
 /// Get database list for current user
