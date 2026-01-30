@@ -59,8 +59,7 @@ build_frontend() {
     npx shadow-cljs release hulunote
     
     log_info "cleaning ... cljs-runtime "
-    for fpath in `find . -name "cljs-runtime"`; do rm -fr $fpath; done
-    rm -fr .shadow-cljs
+    for fpath in `find /Users/xlisp/CljPro/hulunote -name "cljs-runtime"`; do rm -fr $fpath; done
 
     log_success "前端编译完成！"
 }
