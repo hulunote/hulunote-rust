@@ -60,6 +60,7 @@ build_frontend() {
     
     log_info "cleaning ... cljs-runtime "
     for fpath in `find /Users/xlisp/CljPro/hulunote -name "cljs-runtime"`; do rm -fr $fpath; done
+    for fpath in `find /Users/xlisp/CljPro/hulunote-rust -name "cljs-runtime"`; do rm -fr $fpath; done
 
     log_success "前端编译完成！"
 }
@@ -173,8 +174,9 @@ upload_files() {
     
     # 上传配置文件
     log_info "上传配置文件..."
-    if [ -f "$LOCAL_BACKEND_DIR/.env_pro" ]; then
-        scp "$LOCAL_BACKEND_DIR/.env_pro" "$REMOTE_HOST:$REMOTE_APP_DIR/"
+    cp $LOCAL_BACKEND_DIR/.env_pro $LOCAL_BACKEND_DIR/.env
+    if [ -f "$LOCAL_BACKEND_DIR/.env" ]; then
+        scp "$LOCAL_BACKEND_DIR/.env" "$REMOTE_HOST:$REMOTE_APP_DIR/"
     fi
     
     # 上传 SQL 初始化文件
