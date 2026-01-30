@@ -5,6 +5,10 @@
 # 部署前端(ClojureScript)和后端(Rust)到远程服务器
 # =============================================================================
 
+# for cljs compile
+export PATH="/usr/local/opt/openjdk@8/bin:$PATH"
+export CPPFLAGS="-I/usr/local/opt/openjdk@8/include"
+
 set -e  # 遇到错误立即退出
 
 # 配置变量
