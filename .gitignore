@@ -2,3 +2,4 @@ target/
 resources/public/hulunote/
 resources/public/css/
 resources/public/img/
+.env
