@@ -50,11 +50,11 @@ pub struct AccountInfo {
     pub id: i64,
     #[serde(rename = "accounts/username")]
     pub username: String,
-    #[serde(rename = "accounts/nickname")]
+    #[serde(rename = "accounts/nickname", skip_serializing_if = "Option::is_none")]
     pub nickname: Option<String>,
-    #[serde(rename = "accounts/mail")]
+    #[serde(rename = "accounts/mail", skip_serializing_if = "Option::is_none")]
     pub mail: Option<String>,
-    #[serde(rename = "accounts/invitation-code")]
+    #[serde(rename = "accounts/invitation-code", skip_serializing_if = "Option::is_none")]
     pub invitation_code: Option<String>,
     #[serde(rename = "accounts/is-new-user")]
     pub is_new_user: bool,
@@ -102,7 +102,7 @@ pub struct DatabaseInfo {
     pub id: String,
     #[serde(rename = "hulunote-databases/name")]
     pub name: String,
-    #[serde(rename = "hulunote-databases/description")]
+    #[serde(rename = "hulunote-databases/description", skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(rename = "hulunote-databases/is-delete")]
     pub is_delete: bool,
