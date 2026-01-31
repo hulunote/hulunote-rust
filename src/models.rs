@@ -18,6 +18,8 @@ pub struct Account {
     pub oauth_key: Option<String>,
     pub need_update_password: Option<bool>,
     pub is_new_user: bool,
+    pub expires_at: Option<DateTime<Utc>>,
+    pub registration_code: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -34,7 +36,7 @@ pub struct SignupRequest {
     pub username: Option<String>,
     pub email: String,
     pub password: String,
-    pub ack_number: String,
+    pub registration_code: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -360,6 +362,20 @@ pub struct GetAllNavsByPageRequest {
     pub backend_ts: Option<i64>,
     pub page: Option<i64>,
     pub size: Option<i64>,
+}
+
+// ========== Registration Code Models ==========
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct RegistrationCode {
+    pub id: i64,
+    pub code: String,
+    pub validity_days: i32,
+    pub is_used: bool,
+    pub used_by_account_id: Option<i64>,
+    pub used_at: Option<DateTime<Utc>>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 // ========== JWT Claims ==========
