@@ -164,11 +164,15 @@ pub async fn get_note_navs(
     Extension(account_id): Extension<i64>,
     Json(req): Json<GetNavsRequest>,
 ) -> Result<Json<Value>> {
+    // Parse note_id as UUID
+    let note_uuid = Uuid::parse_str(&req.note_id)
+        .map_err(|_| AppError::BadRequest("Invalid note ID format".to_string()))?;
+
     // Check note access (simplified - just check if note exists)
     let note_exists: Option<(i64,)> = sqlx::query_as(
         "SELECT account_id FROM hulunote_notes WHERE id = $1"
     )
-    .bind(&req.note_id)
+    .bind(note_uuid)
     .fetch_optional(state.pool.as_ref())
     .await?;
 
@@ -178,14 +182,14 @@ pub async fn get_note_navs(
 
     let navs: Vec<HulunoteNav> = sqlx::query_as(
         r#"
-        SELECT id, parid, same_deep_order, content, account_id, note_id, database_id, 
+        SELECT id, parid, same_deep_order, content, account_id, note_id, database_id,
                is_display, is_public, is_delete, properties, extra_id, created_at, updated_at
-        FROM hulunote_navs 
+        FROM hulunote_navs
         WHERE note_id = $1 AND is_delete = false
         ORDER BY same_deep_order ASC
         "#,
     )
-    .bind(&req.note_id)
+    .bind(note_uuid)
     .fetch_all(state.pool.as_ref())
     .await?;
 
