@@ -11,14 +11,17 @@ use super::{get_database_id, AppState};
 const ROOT_NAV_ID: &str = "00000000-0000-0000-0000-000000000000";
 
 /// Get database ID by note ID
-async fn get_database_id_by_note(pool: &sqlx::PgPool, note_id: &str) -> Result<Option<String>> {
-    let result: Option<(String,)> = sqlx::query_as(
+async fn get_database_id_by_note(pool: &sqlx::PgPool, note_id: &str) -> Result<Option<Uuid>> {
+    let note_uuid = Uuid::parse_str(note_id)
+        .map_err(|_| AppError::BadRequest("Invalid note ID format".to_string()))?;
+
+    let result: Option<(Uuid,)> = sqlx::query_as(
         "SELECT database_id FROM hulunote_notes WHERE id = $1"
     )
-    .bind(note_id)
+    .bind(note_uuid)
     .fetch_optional(pool)
     .await?;
-    
+
     Ok(result.map(|r| r.0))
 }
 
@@ -28,22 +31,25 @@ pub async fn create_or_update_nav(
     Extension(account_id): Extension<i64>,
     Json(req): Json<CreateOrUpdateNavRequest>,
 ) -> Result<Json<Value>> {
+    // Parse note_id as UUID
+    let note_uuid = Uuid::parse_str(&req.note_id)
+        .map_err(|_| AppError::BadRequest("Invalid note ID format".to_string()))?;
+
     // Get database_id
-    let mut database_id = get_database_id(
+    let mut database_uuid = get_database_id(
         state.pool.as_ref(),
         account_id,
         req.database_id.as_deref(),
         req.database_name.as_deref().or(req.database.as_deref()),
     )
-    .await?
-    .map(|u| u.to_string());
+    .await?;
 
     // If no database_id, try to get from note
-    if database_id.is_none() {
-        database_id = get_database_id_by_note(state.pool.as_ref(), &req.note_id).await?;
+    if database_uuid.is_none() {
+        database_uuid = get_database_id_by_note(state.pool.as_ref(), &req.note_id).await?;
     }
 
-    let database_id = database_id
+    let database_uuid = database_uuid
         .ok_or_else(|| AppError::BadRequest("Database not found".to_string()))?;
 
     let now = Utc::now();
@@ -73,8 +79,10 @@ pub async fn create_or_update_nav(
             }
 
             if let Some(parid) = &req.parid {
+                let parid_uuid = Uuid::parse_str(parid)
+                    .map_err(|_| AppError::BadRequest("Invalid parent ID format".to_string()))?;
                 sqlx::query("UPDATE hulunote_navs SET parid = $1, updated_at = NOW() WHERE id = $2")
-                    .bind(parid)
+                    .bind(parid_uuid)
                     .bind(nav_uuid)
                     .execute(state.pool.as_ref())
                     .await?;
@@ -126,7 +134,9 @@ pub async fn create_or_update_nav(
         .and_then(|id| Uuid::parse_str(id).ok())
         .unwrap_or_else(Uuid::new_v4);
 
-    let parid = req.parid.as_deref().unwrap_or(ROOT_NAV_ID);
+    let parid_str = req.parid.as_deref().unwrap_or(ROOT_NAV_ID);
+    let parid_uuid = Uuid::parse_str(parid_str)
+        .map_err(|_| AppError::BadRequest("Invalid parent ID format".to_string()))?;
     let content = req.content.as_deref().unwrap_or("");
     let order = req.order.unwrap_or(0.0);
     let properties = req.properties.as_deref().unwrap_or("");
@@ -135,17 +145,17 @@ pub async fn create_or_update_nav(
         r#"
         INSERT INTO hulunote_navs (id, parid, same_deep_order, content, account_id, note_id, database_id, properties)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING id, parid, same_deep_order, content, account_id, note_id, database_id, 
+        RETURNING id, parid, same_deep_order, content, account_id, note_id, database_id,
                   is_display, is_public, is_delete, properties, extra_id, created_at, updated_at
         "#,
     )
     .bind(nav_id)
-    .bind(parid)
+    .bind(parid_uuid)
     .bind(order)
     .bind(content)
     .bind(account_id)
-    .bind(&req.note_id)
-    .bind(&database_id)
+    .bind(note_uuid)
+    .bind(database_uuid)
     .bind(properties)
     .fetch_one(state.pool.as_ref())
     .await?;
@@ -223,12 +233,12 @@ pub async fn get_all_navs_by_page(
     // Get total count
     let count: (i64,) = sqlx::query_as(
         r#"
-        SELECT COUNT(*) FROM hulunote_navs 
-        WHERE database_id = $1 
+        SELECT COUNT(*) FROM hulunote_navs
+        WHERE database_id = $1
         AND EXTRACT(EPOCH FROM updated_at) * 1000 > $2
         "#
     )
-    .bind(database_id.to_string())
+    .bind(database_id)
     .bind(backend_ts as f64)
     .fetch_one(state.pool.as_ref())
     .await?;
@@ -238,16 +248,16 @@ pub async fn get_all_navs_by_page(
     // Get navs
     let navs: Vec<HulunoteNav> = sqlx::query_as(
         r#"
-        SELECT id, parid, same_deep_order, content, account_id, note_id, database_id, 
+        SELECT id, parid, same_deep_order, content, account_id, note_id, database_id,
                is_display, is_public, is_delete, properties, extra_id, created_at, updated_at
-        FROM hulunote_navs 
-        WHERE database_id = $1 
+        FROM hulunote_navs
+        WHERE database_id = $1
         AND EXTRACT(EPOCH FROM updated_at) * 1000 > $2
         ORDER BY updated_at ASC
         LIMIT $3 OFFSET $4
         "#,
     )
-    .bind(database_id.to_string())
+    .bind(database_id)
     .bind(backend_ts as f64)
     .bind(size)
     .bind(offset)
@@ -283,15 +293,15 @@ pub async fn get_all_navs(
 
     let navs: Vec<HulunoteNav> = sqlx::query_as(
         r#"
-        SELECT id, parid, same_deep_order, content, account_id, note_id, database_id, 
+        SELECT id, parid, same_deep_order, content, account_id, note_id, database_id,
                is_display, is_public, is_delete, properties, extra_id, created_at, updated_at
-        FROM hulunote_navs 
-        WHERE database_id = $1 
+        FROM hulunote_navs
+        WHERE database_id = $1
         AND EXTRACT(EPOCH FROM updated_at) * 1000 > $2
         ORDER BY updated_at ASC
         "#,
     )
-    .bind(database_id.to_string())
+    .bind(database_id)
     .bind(backend_ts as f64)
     .fetch_all(state.pool.as_ref())
     .await?;
