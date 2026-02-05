@@ -553,7 +553,7 @@ Compared to the Clojure backend:
 
 ## License
 
-[Your License Here]
+MIT
 
 ## Contributing
 
