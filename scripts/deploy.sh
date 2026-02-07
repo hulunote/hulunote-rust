@@ -56,6 +56,7 @@ build_frontend() {
     
     # 使用 shadow-cljs 编译 release 版本
     log_info "执行 shadow-cljs release 编译..."
+    cp shadow-cljs-dev.edn shadow-cljs.edn # use: :output-dir "../hulunote-rust/resources/public/hulunote"
     npx shadow-cljs release hulunote
     
     log_info "cleaning ... cljs-runtime "
