@@ -349,7 +349,10 @@ Content-Type: application/json
 }
 ```
 
-#### Get All Nodes
+#### Get All Navs
+
+Retrieve all navigation items under a specific database.
+
 ```http
 POST /hulunote/get-all-navs
 Content-Type: application/json
