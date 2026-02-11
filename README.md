@@ -260,7 +260,7 @@ POST /hulunote/update-database
 Content-Type: application/json
 
 {
-  "database_id": "uuid",
+  "database-id": "uuid",
   "name": "Updated Name"
 }
 ```
@@ -273,7 +273,7 @@ POST /hulunote/new-note
 Content-Type: application/json
 
 {
-  "database_id": "uuid",
+  "database-id": "uuid",
   "title": "My Note"
 }
 ```
@@ -284,7 +284,7 @@ POST /hulunote/get-note-list
 Content-Type: application/json
 
 {
-  "database_id": "uuid",
+  "database-id": "uuid",
   "page": 1,
   "page_size": 20
 }
@@ -296,7 +296,7 @@ POST /hulunote/get-all-note-list
 Content-Type: application/json
 
 {
-  "database_id": "uuid"
+  "database-id": "uuid"
 }
 ```
 
@@ -343,7 +343,7 @@ POST /hulunote/get-all-nav-by-page
 Content-Type: application/json
 
 {
-  "database_id": "uuid",
+  "database-id": "uuid",
   "page": 1,
   "page_size": 100
 }
@@ -355,7 +355,7 @@ POST /hulunote/get-all-navs
 Content-Type: application/json
 
 {
-  "database_id": "uuid"
+  "database-id": "uuid"
 }
 ```
 
