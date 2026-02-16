@@ -227,6 +227,14 @@ pub struct CreateNoteRequest {
     #[serde(rename = "database-name")]
     pub database_name: Option<String>,
     pub title: String,
+
+    /// Optional client-provided note id (UUID). If omitted, backend generates one.
+    #[serde(rename = "note-id", alias = "note_id")]
+    pub note_id: Option<String>,
+
+    /// Optional client-provided root nav id (UUID). If omitted, backend generates one.
+    #[serde(rename = "root-nav-id", alias = "root_nav_id")]
+    pub root_nav_id: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

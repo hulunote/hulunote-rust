@@ -24,8 +24,46 @@ pub async fn create_note(
     .await?
     .ok_or_else(|| AppError::BadRequest("Database not found".to_string()))?;
 
-    let note_id = Uuid::new_v4();
-    let root_nav_id = Uuid::new_v4();
+    let note_id = if let Some(id) = req.note_id.as_deref() {
+        Uuid::parse_str(id)
+            .map_err(|_| AppError::BadRequest("Invalid note ID format".to_string()))?
+    } else {
+        Uuid::new_v4()
+    };
+
+    let root_nav_id = if let Some(id) = req.root_nav_id.as_deref() {
+        Uuid::parse_str(id)
+            .map_err(|_| AppError::BadRequest("Invalid root nav ID format".to_string()))?
+    } else {
+        Uuid::new_v4()
+    };
+
+    // Guardrails for client-assigned IDs:
+    // - note id and root nav id must differ
+    if note_id == root_nav_id {
+        return Err(AppError::BadRequest(
+            "note-id and root-nav-id must be different".to_string(),
+        ));
+    }
+
+    // - note id must not already exist
+    let note_exists: Option<(Uuid,)> = sqlx::query_as("SELECT id FROM hulunote_notes WHERE id = $1")
+        .bind(note_id)
+        .fetch_optional(state.pool.as_ref())
+        .await?;
+    if note_exists.is_some() {
+        return Err(AppError::BadRequest("note-id already exists".to_string()));
+    }
+
+    // - root nav id must not already exist
+    let root_nav_exists: Option<(Uuid,)> =
+        sqlx::query_as("SELECT id FROM hulunote_navs WHERE id = $1")
+            .bind(root_nav_id)
+            .fetch_optional(state.pool.as_ref())
+            .await?;
+    if root_nav_exists.is_some() {
+        return Err(AppError::BadRequest("root-nav-id already exists".to_string()));
+    }
 
     // Create the note
     let note: HulunoteNote = sqlx::query_as(

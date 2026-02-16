@@ -274,9 +274,16 @@ Content-Type: application/json
 
 {
   "database-id": "uuid",
-  "title": "My Note"
+  "title": "My Note",
+  "note-id": "optional-client-generated-uuid",
+  "root-nav-id": "optional-client-generated-uuid"
 }
 ```
+
+Notes:
+- `note-id` and `root-nav-id` are optional. If omitted, backend generates UUIDs.
+- If provided, both must be valid UUIDs and must not already exist.
+- `note-id` and `root-nav-id` must be different.
 
 #### Get Notes (Paginated)
 ```http
