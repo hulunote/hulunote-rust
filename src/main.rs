@@ -36,6 +36,7 @@ async fn main() -> anyhow::Result<()> {
     // CORS configuration - 允许开发环境跨域
     let cors = CorsLayer::new()
         .allow_origin([
+            "tauri://localhost".parse::<HeaderValue>().unwrap(),
             "http://127.0.0.1:8803".parse::<HeaderValue>().unwrap(),
             "http://localhost:8803".parse::<HeaderValue>().unwrap(),
             "http://127.0.0.1:6689".parse::<HeaderValue>().unwrap(),
