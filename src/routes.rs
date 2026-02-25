@@ -35,6 +35,8 @@ pub fn create_routes() -> Router<AppState> {
         .route("/hulunote/get-nav-list-by-id", post(handlers::get_note_navs))
         .route("/hulunote/get-all-nav-by-page", post(handlers::get_all_navs_by_page))
         .route("/hulunote/get-all-navs", post(handlers::get_all_navs))
+        // Import routes
+        .route("/hulunote/import-notes", post(handlers::import_notes))
         .route_layer(middleware::from_fn(auth_middleware));
 
     Router::new()

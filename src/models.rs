@@ -386,6 +386,46 @@ pub struct RegistrationCode {
     pub updated_at: DateTime<Utc>,
 }
 
+// ========== Import Models ==========
+
+#[derive(Debug, Deserialize)]
+pub struct ImportNoteJson {
+    pub note: ImportNoteData,
+    pub navs: Vec<ImportNavData>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ImportNoteData {
+    #[serde(rename = "hulunote-notes/id")]
+    pub id: String,
+    #[serde(rename = "hulunote-notes/title")]
+    pub title: String,
+    #[serde(rename = "hulunote-navs/root-nav-id")]
+    pub root_nav_id: String,
+    #[serde(rename = "hulunote-notes/is-delete")]
+    pub is_delete: Option<bool>,
+    #[serde(rename = "hulunote-notes/is-public")]
+    pub is_public: Option<bool>,
+    #[serde(rename = "hulunote-notes/is-shortcut")]
+    pub is_shortcut: Option<bool>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ImportNavData {
+    pub id: String,
+    pub parid: String,
+    pub content: String,
+    #[serde(rename = "same-deep-order")]
+    pub same_deep_order: f64,
+    #[allow(dead_code)]
+    #[serde(rename = "hulunote-note")]
+    pub hulunote_note: String,
+    #[serde(rename = "is-display")]
+    pub is_display: Option<bool>,
+    #[serde(rename = "is-delete")]
+    pub is_delete: Option<bool>,
+}
+
 // ========== JWT Claims ==========
 
 #[derive(Debug, Serialize, Deserialize)]
