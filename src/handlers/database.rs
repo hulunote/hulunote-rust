@@ -31,7 +31,7 @@ pub async fn get_database_id(
         .bind(account_id)
         .fetch_optional(pool)
         .await?;
-        
+
         return Ok(result.map(|r| r.0));
     }
 
@@ -52,10 +52,6 @@ pub async fn create_database(
     .fetch_one(state.pool.as_ref())
     .await?;
 
-    if count.0 >= 5 {
-        return Err(AppError::BadRequest("Maximum 5 databases allowed".to_string()));
-    }
-
     // Check if database name already exists for this user
     let existing: Option<(Uuid,)> = sqlx::query_as(
         "SELECT id FROM hulunote_databases WHERE name = $1 AND account_id = $2 AND is_delete = false"
@@ -75,7 +71,7 @@ pub async fn create_database(
         r#"
         INSERT INTO hulunote_databases (id, name, description, account_id)
         VALUES ($1, $2, $3, $4)
-        RETURNING id, name, description, is_delete, is_public, is_offline, is_default, 
+        RETURNING id, name, description, is_delete, is_public, is_offline, is_default,
                   account_id, setting, created_at, updated_at
         "#,
     )
@@ -120,7 +116,7 @@ pub async fn delete_database(
         .bind(account_id)
         .fetch_optional(state.pool.as_ref())
         .await?;
-        
+
         result
             .map(|r| r.0)
             .ok_or_else(|| AppError::NotFound("Database not found".to_string()))?
@@ -184,9 +180,9 @@ pub async fn get_database_list(
 ) -> Result<Json<Value>> {
     let databases: Vec<HulunoteDatabase> = sqlx::query_as(
         r#"
-        SELECT id, name, description, is_delete, is_public, is_offline, is_default, 
+        SELECT id, name, description, is_delete, is_public, is_offline, is_default,
                account_id, setting, created_at, updated_at
-        FROM hulunote_databases 
+        FROM hulunote_databases
         WHERE account_id = $1 AND is_delete = false
         ORDER BY created_at DESC
         "#,
@@ -214,7 +210,7 @@ pub async fn update_database(
 ) -> Result<Json<Value>> {
     let database_id = req.database_id.or(req.id)
         .ok_or_else(|| AppError::BadRequest("Database ID required".to_string()))?;
-    
+
     let db_uuid = Uuid::parse_str(&database_id)
         .map_err(|_| AppError::BadRequest("Invalid database ID".to_string()))?;
 
@@ -267,7 +263,7 @@ pub async fn update_database(
     );
 
     let mut query_builder = sqlx::query(&query).bind(db_uuid);
-    
+
     if let Some(v) = req.is_public {
         query_builder = query_builder.bind(v);
     }
