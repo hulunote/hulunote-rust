@@ -2,6 +2,7 @@ use axum::extract::{Multipart, State};
 use axum::Extension;
 use axum::Json;
 use serde_json::{json, Value};
+use std::io::Read;
 use uuid::Uuid;
 
 use crate::error::{AppError, Result};
@@ -11,11 +12,45 @@ use super::{get_database_id, AppState};
 
 const ROOT_NAV_ID: &str = "00000000-0000-0000-0000-000000000000";
 
-/// Import notes from uploaded JSON files (multipart form)
+/// Extract JSON files from uploaded data.
+/// If the file is a .zip, extracts all .json entries inside it.
+/// Otherwise treats the file as a plain JSON file.
+fn collect_json_files(filename: &str, data: Vec<u8>) -> Result<Vec<(String, Vec<u8>)>> {
+    let lower = filename.to_lowercase();
+    if lower.ends_with(".zip") {
+        let cursor = std::io::Cursor::new(data);
+        let mut archive = zip::ZipArchive::new(cursor)
+            .map_err(|e| AppError::BadRequest(format!("Invalid ZIP file {}: {}", filename, e)))?;
+
+        let mut files = Vec::new();
+        for i in 0..archive.len() {
+            let mut entry = archive.by_index(i).map_err(|e| {
+                AppError::BadRequest(format!("Failed to read ZIP entry: {}", e))
+            })?;
+
+            let entry_name = entry.name().to_string();
+            // Skip directories and non-json files
+            if entry.is_dir() || !entry_name.to_lowercase().ends_with(".json") {
+                continue;
+            }
+
+            let mut buf = Vec::new();
+            entry.read_to_end(&mut buf).map_err(|e| {
+                AppError::BadRequest(format!("Failed to read ZIP entry {}: {}", entry_name, e))
+            })?;
+            files.push((entry_name, buf));
+        }
+        Ok(files)
+    } else {
+        Ok(vec![(filename.to_string(), data)])
+    }
+}
+
+/// Import notes from uploaded JSON / ZIP files (multipart form)
 ///
 /// Form fields:
 ///   - `database-id` or `database-name`: target database
-///   - one or more file fields: JSON files matching the export format
+///   - one or more file fields: JSON files or ZIP archives containing JSON files
 pub async fn import_notes(
     State(state): State<AppState>,
     Extension(account_id): Extension<i64>,
@@ -58,13 +93,18 @@ pub async fn import_notes(
                     .bytes()
                     .await
                     .map_err(|e| AppError::BadRequest(format!("Failed to read file: {}", e)))?;
-                json_files.push((filename, data.to_vec()));
+
+                // Expand ZIP files into individual JSON files
+                let extracted = collect_json_files(&filename, data.to_vec())?;
+                json_files.extend(extracted);
             }
         }
     }
 
     if json_files.is_empty() {
-        return Err(AppError::BadRequest("No JSON files uploaded".to_string()));
+        return Err(AppError::BadRequest(
+            "No JSON files uploaded (or ZIP contains no .json files)".to_string(),
+        ));
     }
 
     // Resolve target database
