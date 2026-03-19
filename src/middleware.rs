@@ -43,8 +43,13 @@ pub async fn auth_middleware(
 
 pub fn generate_token(account_id: i64) -> Result<String> {
     let config = Config::from_env();
+    generate_token_with_hours(account_id, config.jwt_expiry_hours)
+}
+
+pub fn generate_token_with_hours(account_id: i64, hours: i64) -> Result<String> {
+    let config = Config::from_env();
     let expiration = chrono::Utc::now()
-        .checked_add_signed(chrono::Duration::hours(config.jwt_expiry_hours))
+        .checked_add_signed(chrono::Duration::hours(hours))
         .expect("valid timestamp")
         .timestamp();
 

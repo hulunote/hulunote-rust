@@ -13,6 +13,8 @@ pub struct Account {
     #[serde(skip_serializing)]
     pub password: Option<String>,
     pub mail: Option<String>,
+    pub avatar: Option<String>,
+    pub introduction: Option<String>,
     pub invitation_code: Option<String>,
     pub cell_number: Option<String>,
     pub oauth_key: Option<String>,
@@ -56,6 +58,10 @@ pub struct AccountInfo {
     pub nickname: Option<String>,
     #[serde(rename = "accounts/mail", skip_serializing_if = "Option::is_none")]
     pub mail: Option<String>,
+    #[serde(rename = "accounts/avatar", skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<String>,
+    #[serde(rename = "accounts/introduction", skip_serializing_if = "Option::is_none")]
+    pub introduction: Option<String>,
     #[serde(rename = "accounts/invitation-code", skip_serializing_if = "Option::is_none")]
     pub invitation_code: Option<String>,
     #[serde(rename = "accounts/is-new-user")]
@@ -73,12 +79,20 @@ impl From<Account> for AccountInfo {
             username: account.username,
             nickname: account.nickname,
             mail: account.mail,
+            avatar: account.avatar,
+            introduction: account.introduction,
             invitation_code: account.invitation_code,
             is_new_user: account.is_new_user,
             created_at: account.created_at.to_rfc3339(),
             updated_at: account.updated_at.to_rfc3339(),
         }
     }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateProfileRequest {
+    pub nickname: Option<String>,
+    pub introduction: Option<String>,
 }
 
 // ========== Database Models ==========

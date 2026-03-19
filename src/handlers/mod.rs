@@ -3,12 +3,14 @@ mod database;
 mod import;
 mod note;
 mod nav;
+mod user;
 
 pub use auth::*;
 pub use database::*;
 pub use import::*;
 pub use note::*;
 pub use nav::*;
+pub use user::*;
 
 use sqlx::PgPool;
 use std::sync::Arc;

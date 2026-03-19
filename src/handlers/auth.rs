@@ -25,9 +25,9 @@ pub async fn web_login(
     // Find account by username or email
     let account: Option<Account> = sqlx::query_as(
         r#"
-        SELECT id, username, nickname, password, mail, invitation_code,
-               cell_number, oauth_key, need_update_password, is_new_user,
-               expires_at, registration_code, created_at, updated_at
+        SELECT id, username, nickname, password, mail, avatar, introduction,
+               invitation_code, cell_number, oauth_key, need_update_password,
+               is_new_user, expires_at, registration_code, created_at, updated_at
         FROM accounts
         WHERE username = $1 OR mail = $1
         "#,
@@ -134,9 +134,9 @@ pub async fn web_signup(
         INSERT INTO accounts (username, nickname, password, mail, invitation_code, cell_number,
                               is_new_user, expires_at, registration_code)
         VALUES ($1, $2, $3, $4, $5, $6, true, $7, $8)
-        RETURNING id, username, nickname, password, mail, invitation_code,
-                  cell_number, oauth_key, need_update_password, is_new_user,
-                  expires_at, registration_code, created_at, updated_at
+        RETURNING id, username, nickname, password, mail, avatar, introduction,
+                  invitation_code, cell_number, oauth_key, need_update_password,
+                  is_new_user, expires_at, registration_code, created_at, updated_at
         "#,
     )
     .bind(&username)

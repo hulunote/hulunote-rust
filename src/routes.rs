@@ -16,6 +16,11 @@ pub fn create_routes() -> Router<AppState> {
 
     // Protected routes (auth required)
     let protected_routes = Router::new()
+        // User profile routes
+        .route("/user/profile", get(handlers::get_profile))
+        .route("/user/update-profile", post(handlers::update_profile))
+        .route("/user/upload-avatar", post(handlers::upload_avatar))
+        .route("/user/generate-token", post(handlers::generate_user_token))
         // Database routes
         .route("/hulunote/new-database", post(handlers::create_database))
         .route("/hulunote/create-database", post(handlers::create_database))
