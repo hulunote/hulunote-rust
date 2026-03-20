@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::error::{AppError, Result};
 use crate::models::*;
 
-use super::{get_database_id, AppState};
+use super::{get_database_id, ws::WsEvent, AppState};
 
 const ROOT_NAV_ID: &str = "00000000-0000-0000-0000-000000000000";
 
@@ -96,6 +96,20 @@ pub async fn create_note(
     .bind(database_id.to_string())
     .execute(state.pool.as_ref())
     .await?;
+
+    // Broadcast note_created event to connected WebSocket clients
+    state
+        .ws_broadcaster
+        .broadcast(
+            account_id,
+            WsEvent::NoteCreated {
+                note_id: note_id.to_string(),
+                database_id: database_id.to_string(),
+                title: req.title.clone(),
+                root_nav_id: root_nav_id.to_string(),
+            },
+        )
+        .await;
 
     Ok(Json(json!(NoteInfo::from(note))))
 }

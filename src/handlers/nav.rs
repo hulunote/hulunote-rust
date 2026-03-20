@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::error::{AppError, Result};
 use crate::models::*;
 
-use super::{get_database_id, AppState};
+use super::{get_database_id, ws::WsEvent, AppState};
 
 const ROOT_NAV_ID: &str = "00000000-0000-0000-0000-000000000000";
 
@@ -154,6 +154,20 @@ pub async fn create_or_update_nav(
     .bind(properties)
     .fetch_one(state.pool.as_ref())
     .await?;
+
+    // Broadcast nav_updated event to connected WebSocket clients
+    state
+        .ws_broadcaster
+        .broadcast(
+            account_id,
+            WsEvent::NavUpdated {
+                nav_id: nav.id.to_string(),
+                note_id: req.note_id.clone(),
+                database_id: database_id.clone(),
+                content: content.to_string(),
+            },
+        )
+        .await;
 
     Ok(Json(json!({
         "success": true,

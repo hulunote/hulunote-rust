@@ -4,7 +4,7 @@ use axum::{
     Router,
 };
 
-use crate::handlers::{self, AppState};
+use crate::handlers::{self, ws, AppState};
 use crate::middleware::auth_middleware;
 
 pub fn create_routes() -> Router<AppState> {
@@ -13,6 +13,10 @@ pub fn create_routes() -> Router<AppState> {
         .route("/login/web-login", post(handlers::web_login))
         .route("/login/web-signup", post(handlers::web_signup))
         .route("/login/send-ack-msg", post(handlers::send_ack_msg));
+
+    // WebSocket route (auth via query param token)
+    let ws_routes = Router::new()
+        .route("/ws", get(ws::ws_handler));
 
     // Protected routes (auth required)
     let protected_routes = Router::new()
@@ -46,5 +50,6 @@ pub fn create_routes() -> Router<AppState> {
 
     Router::new()
         .merge(public_routes)
+        .merge(ws_routes)
         .merge(protected_routes)
 }

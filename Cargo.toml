@@ -7,7 +7,7 @@ description = "Hulunote - Outline note-taking application backend"
 
 [dependencies]
 # Web framework
-axum = { version = "0.7", features = ["macros", "multipart"] }
+axum = { version = "0.7", features = ["macros", "multipart", "ws"] }
 tokio = { version = "1", features = ["full"] }
 tower = "0.4"
 tower-http = { version = "0.5", features = ["cors", "fs", "trace"] }
