@@ -38,6 +38,16 @@ impl IntoResponse for AppError {
         let (status, error_message) = match &self {
             AppError::Database(e) => {
                 tracing::error!("Database error: {:?}", e);
+                // Extract useful message for unique constraint violations (PG error code 23505)
+                if let sqlx::Error::Database(ref db_err) = e {
+                    if db_err.code().as_deref() == Some("23505") {
+                        // Duplicate key - return 409 Conflict with detail
+                        let detail = db_err.message().to_string();
+                        return (StatusCode::CONFLICT, Json(json!({
+                            "error": format!("Duplicate entry: {}", detail)
+                        }))).into_response();
+                    }
+                }
                 (StatusCode::INTERNAL_SERVER_ERROR, "Database error".to_string())
             }
             AppError::Auth(msg) => (StatusCode::UNAUTHORIZED, msg.clone()),

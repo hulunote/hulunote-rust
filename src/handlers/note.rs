@@ -65,12 +65,12 @@ pub async fn create_note(
         return Err(AppError::BadRequest("root-nav-id already exists".to_string()));
     }
 
-    // Create the note
-    let note: HulunoteNote = sqlx::query_as(
+    // Create the note (handle duplicate title gracefully)
+    let insert_result = sqlx::query_as::<_, HulunoteNote>(
         r#"
         INSERT INTO hulunote_notes (id, title, database_id, root_nav_id, account_id)
         VALUES ($1, $2, $3, $4, $5)
-        RETURNING id, title, database_id, root_nav_id, is_delete, is_public, 
+        RETURNING id, title, database_id, root_nav_id, is_delete, is_public,
                   is_shortcut, account_id, pv, created_at, updated_at
         "#,
     )
@@ -80,7 +80,31 @@ pub async fn create_note(
     .bind(root_nav_id.to_string())
     .bind(account_id)
     .fetch_one(state.pool.as_ref())
-    .await?;
+    .await;
+
+    let note: HulunoteNote = match insert_result {
+        Ok(note) => note,
+        Err(sqlx::Error::Database(ref db_err)) if db_err.code().as_deref() == Some("23505") => {
+            // Duplicate title — return the existing note instead of failing
+            let existing: HulunoteNote = sqlx::query_as(
+                r#"
+                SELECT id, title, database_id, root_nav_id, is_delete, is_public,
+                       is_shortcut, account_id, pv, created_at, updated_at
+                FROM hulunote_notes
+                WHERE database_id = $1 AND title = $2 AND is_delete = false
+                "#,
+            )
+            .bind(database_id.to_string())
+            .bind(&req.title)
+            .fetch_optional(state.pool.as_ref())
+            .await?
+            .ok_or_else(|| AppError::BadRequest(
+                format!("A note titled '{}' already exists but could not be retrieved", req.title)
+            ))?;
+            return Ok(Json(json!(NoteInfo::from(existing))));
+        }
+        Err(e) => return Err(e.into()),
+    };
 
     // Create the root nav for this note
     sqlx::query(
